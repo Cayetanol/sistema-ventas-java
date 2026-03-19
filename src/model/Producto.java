@@ -1,0 +1,44 @@
+package model;
+
+public class Producto {
+    private int id;
+    private float precio;
+    private String nombre;
+    private int stock;
+
+    public Producto(String nombre, float precio, int stock) {
+    this.id = 0;
+        this.precio = precio;
+        this.nombre = nombre;
+        this.stock = stock;
+    }
+
+    public float getPrecio() {
+        return this.precio;
+    }
+
+    public String getNombre() {
+        return this.nombre;
+    }
+
+    public int getId(){
+        return this.id;
+    }
+
+    public int getStock(){
+        return this.stock;
+    }
+
+    public void setId(int id){
+        this.id = id;
+    }
+
+    public void setStock(int stock){
+        this.stock = stock;
+    }
+
+    @Override
+    public String toString(){
+        return "Id: " + getId() + " | Producto: " + getNombre() + " | Precio: " + getPrecio();
+    }
+}
