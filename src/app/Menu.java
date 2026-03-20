@@ -5,16 +5,20 @@ import controller.ControladorVenta;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
+import model.InformeVentas;
 import model.Producto;
 import model.Venta;
-import repository.ProductoRepositorio;
 
 public class Menu {
 
-    ProductoRepositorio repo = new ProductoRepositorio();
-    ControladorProducto controlador = new ControladorProducto(repo);
-    ControladorVenta controladorVenta = new ControladorVenta(repo);
-    Scanner sc = new Scanner(System.in);
+    private ControladorProducto controladorProducto;
+    private ControladorVenta controladorVenta;
+    private Scanner sc = new Scanner(System.in);
+
+    public Menu(ControladorProducto controladorProducto, ControladorVenta controladorVenta) {
+        this.controladorProducto = controladorProducto;
+        this.controladorVenta = controladorVenta;
+    }
 
     public void opcion() {
         int numeroOpcion;
@@ -62,6 +66,12 @@ public class Menu {
                 opcionesProductos();
                 break;
             case 3:
+                InformeVentas informe = controladorVenta.informeVentas();
+
+                System.out.println("===== INFORME DE VENTAS =====");
+                System.out.println("Cantidad de ventas: " + informe.getCantidadVentas());
+                System.out.println("Total vendido: " + informe.getTotalVendido());
+                System.out.println("Ventas del dia: " + informe.getVentasDelDia());
                 break;
             case 4:
                 System.out.println("Saliendo...");
@@ -114,16 +124,16 @@ public class Menu {
                     break;
                 case 2:
                     try {
-                        
+
                         System.out.println("Ingrese id del producto a eliminar");
                         int id = sc.nextInt();
                         sc.nextLine();
 
                         boolean resultado = controladorVenta.eliminarProducto(id);
 
-                        if(resultado){
+                        if (resultado) {
                             System.out.println("Producto eliminado del carrito con exito.");
-                        }else{
+                        } else {
                             System.out.println("El producto no estaba en el carrito.");
                         }
                     } catch (Exception e) {
@@ -191,7 +201,7 @@ public class Menu {
                         int stock = sc.nextInt();
                         sc.nextLine();
 
-                        controlador.crearProducto(nombre, precio, stock);
+                        controladorProducto.crearProducto(nombre, precio, stock);
 
                         System.out.println("Producto creado correctamente.");
 
@@ -201,7 +211,7 @@ public class Menu {
                     break;
                 case 2:
                     try {
-                        List<Producto> lista = controlador.listarProductos();
+                        List<Producto> lista = controladorProducto.listarProductos();
 
                         for (Producto producto : lista) {
                             System.out.println(producto);
@@ -216,7 +226,7 @@ public class Menu {
                         int id = sc.nextInt();
                         sc.nextLine();
 
-                        controlador.eliminarProducto(id);
+                        controladorProducto.eliminarProducto(id);
                         System.out.println("Producto eliminado.");
                     } catch (Exception e) {
                         System.out.println("No existe un producto con ese id");
@@ -232,7 +242,7 @@ public class Menu {
                         int nuevoStock = sc.nextInt();
                         sc.nextLine();
 
-                        controlador.actualizarStock(id, nuevoStock);
+                        controladorProducto.actualizarStock(id, nuevoStock);
                         System.out.println("Stock actualizado.");
                     } catch (Exception e) {
                         System.out.println("No existe el producto");

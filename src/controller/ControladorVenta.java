@@ -1,11 +1,13 @@
 package controller;
 
 import java.util.List;
+import model.InformeVentas;
 import model.ItemVenta;
 import model.Producto;
 import model.Venta;
 import repository.ProductoRepositorio;
 import repository.VentaRepositorio;
+import service.InformeService;
 import service.TicketService;
 
 public class ControladorVenta {
@@ -14,12 +16,14 @@ public class ControladorVenta {
     private ProductoRepositorio repo;
     private VentaRepositorio ventaRepository;
     private TicketService ticketServicio;
-
-    public ControladorVenta(ProductoRepositorio repo) {
-        this.repo = repo;
-        this.ventaRepository = new VentaRepositorio();
-        this.ticketServicio = new TicketService();
-    }
+    private InformeService informeServicio;
+    
+    public ControladorVenta(ProductoRepositorio repo, InformeService informeServicio, VentaRepositorio ventaRepository) {
+    this.repo = repo;
+    this.ventaRepository = ventaRepository;
+    this.ticketServicio = new TicketService();
+    this.informeServicio = informeServicio;
+}
 //-----------------------------------------------------------------------------------------------//
 
     public void nuevaVenta() {
@@ -108,5 +112,9 @@ public class ControladorVenta {
             throw new IllegalArgumentException("Error venta nula");
         }
         return resultado;
+    }
+//-----------------------------------------------------------------------------------------------//
+    public InformeVentas informeVentas(){
+        return informeServicio.informeVentas();
     }
 }
