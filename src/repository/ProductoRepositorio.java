@@ -1,5 +1,6 @@
 package repository;
 
+import Exceptions.IdInvalidoException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,10 +13,10 @@ public class ProductoRepositorio {
     private int siguienteId = 1;
 
 //-----------------------------------------------------------------------------------------------//
-    public void agregarProducto(Producto producto){
+    public void agregarProducto(Producto producto)throws IdInvalidoException{
         
         if(producto == null){
-            throw new IllegalArgumentException("");
+            throw new IdInvalidoException("Error: Producto no encontrado");
         }
 
         int id = siguienteId;
@@ -24,21 +25,21 @@ public class ProductoRepositorio {
         this.productos.put(id, producto);
     }
 //-----------------------------------------------------------------------------------------------//
-    public Producto buscarProducto(int id){
+    public Producto buscarProducto(int id) throws IdInvalidoException{
 
         Producto producto = productos.get(id);
 
         if(producto == null){
-            throw new IllegalArgumentException("");
+            throw new IdInvalidoException("Error: Producto no encontrado.");
         }
 
         return producto;
     }
 //-----------------------------------------------------------------------------------------------//
-    public void eliminarProducto(int id){
+    public void eliminarProducto(int id) throws IdInvalidoException{
 
         if(!productos.containsKey(id)){
-            throw new IllegalArgumentException("");
+            throw new IdInvalidoException("Error: Producto no encontrado.");
         }
 
         this.productos.remove(id);

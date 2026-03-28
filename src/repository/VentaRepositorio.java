@@ -1,5 +1,6 @@
 package repository;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import model.Venta;
@@ -9,7 +10,7 @@ public class VentaRepositorio {
     private int siguienteId = 1;
     List<Venta> ventas = new ArrayList<>();
 
-    public void guardarVenta(Venta venta){
+    public void guardarVenta(Venta venta) throws SQLException{
         venta.setId(siguienteId);
         siguienteId++;
         ventas.add(venta);

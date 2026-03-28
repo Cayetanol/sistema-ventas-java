@@ -2,18 +2,18 @@ package model;
 
 public class Producto {
     private int id;
-    private float precio;
+    private double precio;
     private String nombre;
     private int stock;
 
-    public Producto(String nombre, float precio, int stock) {
+    public Producto(String nombre, double precio, int stock) {
     this.id = 0;
         this.precio = precio;
         this.nombre = nombre;
         this.stock = stock;
     }
 
-    public float getPrecio() {
+    public double getPrecio() {
         return this.precio;
     }
 
@@ -39,6 +39,19 @@ public class Producto {
 
     @Override
     public String toString(){
-        return "Id: " + getId() + " | Producto: " + getNombre() + " | Precio: " + getPrecio();
+        return "Id: " + getId() + " | Producto: " + getNombre() + " | Precio: " + getPrecio() + " | Stock: " + getStock();
     }
+
+    @Override
+public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (obj == null || getClass() != obj.getClass()) return false;
+    Producto other = (Producto) obj;
+    return this.id == other.id;
+}
+
+@Override
+public int hashCode() {
+    return Integer.hashCode(id);
+}
 }

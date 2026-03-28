@@ -8,17 +8,18 @@ public class Venta {
 
     private int id;
     private LocalDate fecha;
+    private double total;
     private List<ItemVenta> itemList;
 
     public Venta(int id, LocalDate fecha) {
         this.id = id;
         this.fecha = fecha;
-        itemList = new ArrayList<>();
+        this.itemList = new ArrayList<>();
     }
 
     public Venta() {
-        itemList = new ArrayList<>();
-        fecha = LocalDate.now();
+        this.itemList = new ArrayList<>();
+        this.fecha = LocalDate.now();
     }
 
 //-----------------------------------------------------------------------------------------------//
@@ -37,7 +38,7 @@ public class Venta {
 
         for (ItemVenta i : itemList) {
 
-            if (i.getProducto().equals(item.getProducto())) {
+            if (i.getProducto().getId() == item.getProducto().getId()) {
                 i.aumentarCantidad(item.getCantidad());
                 flag = true;
                 break;
@@ -51,14 +52,8 @@ public class Venta {
 //-----------------------------------------------------------------------------------------------//
 //Calcular total
 
-    public float getTotal() {
-        float total = 0;
-
-        for (ItemVenta i : itemList) {
-            total += i.getProducto().getPrecio() * i.getCantidad();
-        }
-
-        return total;
+    public double getTotal() {
+        return this.total; // Usar el total almacenado en lugar de recalcularlo
     }
 //-----------------------------------------------------------------------------------------------//
 
@@ -73,7 +68,7 @@ public class Venta {
 
         String nombre = itemVenta.getProducto().getNombre();
         int cantidad = itemVenta.getCantidad();
-        float subtotal = itemVenta.getProducto().getPrecio() * itemVenta.getCantidad();
+        double subtotal = itemVenta.getProducto().getPrecio() * itemVenta.getCantidad();
 
         ticket.append(String.format("%-15s x%-3d $%8.2f\n", nombre, cantidad, subtotal));
     }
@@ -95,6 +90,7 @@ public class Venta {
     }
 //-----------------------------------------------------------------------------------------------//
 
+//-----------------------------------------------------------------------------------------------//
     public int getId() {
         return id;
     }
@@ -109,5 +105,13 @@ public class Venta {
 
     public void setId(int id){
         this.id = id;
+    }
+
+    public void setFecha(LocalDate fecha){
+        this.fecha = fecha;
+    }
+
+    public void setTotal(double total){
+        this.total = total;
     }
 }

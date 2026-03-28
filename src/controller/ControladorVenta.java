@@ -1,29 +1,33 @@
 package controller;
 
+import Exceptions.IdInvalidoException;
+import Exceptions.ProductoNullException;
+import java.sql.SQLException;
 import java.util.List;
 import model.InformeVentas;
 import model.ItemVenta;
 import model.Producto;
 import model.Venta;
-import repository.ProductoRepositorio;
 import repository.VentaRepositorio;
+import repository.VentaRepositorySQLite;
 import service.InformeService;
+import service.ProductoService;
 import service.TicketService;
 
 public class ControladorVenta {
 
     private Venta ventaActual;
-    private ProductoRepositorio repo;
-    private VentaRepositorio ventaRepository;
+    private ProductoService service;
+    private VentaRepositorySQLite ventaRepository;
     private TicketService ticketServicio;
     private InformeService informeServicio;
-    
-    public ControladorVenta(ProductoRepositorio repo, InformeService informeServicio, VentaRepositorio ventaRepository) {
-    this.repo = repo;
-    this.ventaRepository = ventaRepository;
-    this.ticketServicio = new TicketService();
-    this.informeServicio = informeServicio;
-}
+
+    public ControladorVenta(ProductoService service, InformeService informeServicio, VentaRepositorio ventaRepository) {
+        this.service = service;
+        this.ventaRepository = new VentaRepositorySQLite();
+        this.ticketServicio = new TicketService();
+        this.informeServicio = informeServicio;
+    }
 //-----------------------------------------------------------------------------------------------//
 
     public void nuevaVenta() {
@@ -31,53 +35,60 @@ public class ControladorVenta {
     }
 //-----------------------------------------------------------------------------------------------//
 
-    public void agregarProductoVenta(int id, int cantidad) {
+    public void agregarProductoVenta(int id, int cantidad) throws IdInvalidoException, ProductoNullException {
         if (cantidad <= 0) {
-            throw new IllegalArgumentException("");
+            throw new IllegalArgumentException("Error: La cantidad no puede ser menor o igual a cero.");
         }
 
         if (ventaActual == null) {
-            throw new IllegalArgumentException("");
+            throw new IllegalArgumentException("Error: No hay venta activa.");
         }
 
-        Producto producto = repo.buscarProducto(id);
+        Producto producto = service.buscarProducto(id);
         ItemVenta itemVenta = new ItemVenta(producto, cantidad);
-
+        itemVenta.setPrecioUnitario(producto.getPrecio());
         ventaActual.agregarItem(itemVenta);
     }
 //-----------------------------------------------------------------------------------------------//
 
-    public float finalizarVenta() {
+    public double finalizarVenta() throws IdInvalidoException, SQLException {
+
         if (ventaActual == null) {
-            throw new IllegalArgumentException("");
+            throw new IllegalArgumentException("Error: No hay venta activa.");
         }
 
         if (ventaActual.getItem().isEmpty()) {
-            throw new IllegalArgumentException("");
+            throw new IllegalArgumentException("Error: La venta no tiene productos.");
         }
 
-        for (ItemVenta i : ventaActual.getItem()) {
-            Producto p = i.getProducto();
-            int stock = p.getStock();
-            int cantidad = i.getCantidad();
+        double total = 0;
+        for (ItemVenta item : ventaActual.getItem()) {
+            total += item.getCantidad() * item.getPrecioUnitario();
+        }
+        ventaActual.setTotal(total);
 
-            if (stock < cantidad) {
-                throw new IllegalArgumentException("Stock insuficiente para: " + p.getNombre());
+        for (ItemVenta item : ventaActual.getItem()) {
+
+            System.out.println("Producto: " + item.getProducto().getNombre());
+            System.out.println("Stock actual: " + item.getProducto().getStock());
+            System.out.println("Cantidad pedida: " + item.getCantidad());
+
+            if (item.getCantidad() > item.getProducto().getStock()) {
+
+                throw new IllegalArgumentException(
+                        "Stock insuficiente para: " + item.getProducto().getNombre()
+                );
             }
         }
 
-        for (ItemVenta i : ventaActual.getItem()) {
+        for (ItemVenta item : ventaActual.getItem()) {
 
-            Producto p = i.getProducto();
-            int stock = p.getStock();
-            int cantidad = i.getCantidad();
+            Producto p = item.getProducto();
+            int nuevoStock = p.getStock() - item.getCantidad();
 
-            int nuevoStock = stock - cantidad;
-
-            p.setStock(nuevoStock);
+            service.actualizarStock(p.getId(), nuevoStock);
         }
 
-        float total = ventaActual.getTotal();
         String ticket = ventaActual.generarTicket();
         ticketServicio.guardar(ticket);
         ventaRepository.guardarVenta(ventaActual);
@@ -87,34 +98,43 @@ public class ControladorVenta {
         return total;
     }
 //-----------------------------------------------------------------------------------------------//
-    public void listarVentas(){
+
+    public void listarVentas() throws SQLException {
         List<Venta> ventas = ventaRepository.listarVentas();
-        
+
         for (Venta venta : ventas) {
             System.out.println("Venta ID: " + venta.getId() + " | Total: $" + venta.getTotal() + " | Items: " + venta.getItem().size());
         }
     }
 //-----------------------------------------------------------------------------------------------//
-    public Venta buscarVenta(int id){
-        if(id <= 0){
-            throw new IllegalArgumentException("ID INVALIDO: No puede ingresar un id menor a 1.");
+
+    public Venta buscarVenta(int id) throws SQLException {
+        List<Venta> ventas = ventaRepository.listarVentas();
+
+        for (Venta v : ventas) {
+            if (v.getId() == id) {
+                return v;
+            }
         }
-        return ventaRepository.buscarVenta(id);
+
+        return null;
     }
 //-----------------------------------------------------------------------------------------------//
-    public boolean eliminarProducto(int id){
-        if(id <= 0){
+
+    public boolean eliminarProducto(int id) {
+        if (id <= 0) {
             throw new IllegalArgumentException("ID INVALIDO: No puede ingresar un id menor a 1.");
+        }
+        if (ventaActual == null) {
+            throw new IllegalArgumentException("Error venta nula");
         }
         boolean resultado = ventaActual.eliminarProducto(id);
 
-        if(ventaActual == null){
-            throw new IllegalArgumentException("Error venta nula");
-        }
         return resultado;
     }
 //-----------------------------------------------------------------------------------------------//
-    public InformeVentas informeVentas(){
+
+    public InformeVentas informeVentas() {
         return informeServicio.informeVentas();
     }
 }
